@@ -1,0 +1,12 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# Sửa dòng này: Copy file requirements.txt từ thư mục gốc demo/
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy mã nguồn trong thư mục 2_log_pipeline
+COPY 2_log_pipeline/ .
+
+CMD ["python", "log_watcher.py"]

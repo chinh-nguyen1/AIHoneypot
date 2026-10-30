@@ -1,0 +1,90 @@
+version: "3.8"
+
+networks:
+  honeypot_net:
+    driver: bridge
+  soc_internal_net:
+    driver: bridge
+
+services:
+  # 1. CSDL MySQL (Tham gia CẢ 2 MẠNG để Web bẫy & Dashboard đều truy cập được)
+  database:
+    build:
+      context: .
+      dockerfile: Dockerfile.database
+    container_name: honeypot_db
+    ports:
+      - "3306:3306"
+    networks:
+      - honeypot_net # <-- BỔ SUNG DÒNG NÀY
+      - soc_internal_net
+
+  # 2. Web Bẫy PHP
+  decoy_web:
+    build:
+      context: .
+      dockerfile: Dockerfile.decoy
+    container_name: honeypot_decoy_web
+    ports:
+      - "8080:80"
+    volumes:
+      - ./1_decoy_web/logs:/var/www/html/logs
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+    networks:
+      - honeypot_net
+
+  # 3. Lõi AI FastAPI
+  ai_engine:
+    build:
+      context: .
+      dockerfile: Dockerfile.ai
+    container_name: honeypot_ai_engine
+    ports:
+      - "8000:8000"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    networks:
+      - soc_internal_net
+
+  # 4. Log Pipeline & Email Alert
+  log_pipeline:
+    build:
+      context: .
+      dockerfile: Dockerfile.pipeline
+    container_name: honeypot_log_pipeline
+    volumes:
+      - ./1_decoy_web/logs:/app/logs:ro
+    depends_on:
+      - database
+      - ai_engine
+    networks:
+      - honeypot_net
+      - soc_internal_net
+
+  # 5. SOC Dashboard ReactJS
+  frontend_dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.dashboard
+    container_name: honeypot_dashboard
+    ports:
+      - "3000:80"
+    depends_on:
+      - database
+    networks:
+      - soc_internal_net
+
+  # 6. Attacker Console
+  attacker_console:
+    build:
+      context: .
+      dockerfile: Dockerfile.attacker
+    container_name: honeypot_attacker_console
+    ports:
+      - "8081:80"
+    networks:
+      - honeypot_net

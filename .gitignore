@@ -1,0 +1,24 @@
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+
+# IDE
+.idea/
+
+# Temporary files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+
+# Database files (only generated local databases)
+*.sqlite3

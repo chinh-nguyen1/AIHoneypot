@@ -1,0 +1,13 @@
+# Giai đoạn 1: Build ReactJS từ thư mục 5_frontend_dashboard/
+FROM node:18-alpine AS build
+WORKDIR /app
+COPY 5_frontend_dashboard/package*.json ./
+RUN npm install
+COPY 5_frontend_dashboard/ .
+RUN npm run build
+
+# Giai đoạn 2: Phục vụ Web tĩnh bằng Nginx
+FROM nginx:alpine
+COPY --from=build /app/build /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
