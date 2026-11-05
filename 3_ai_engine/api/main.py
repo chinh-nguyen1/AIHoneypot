@@ -1,12 +1,22 @@
+import logging
+import math
+import os
+from pathlib import Path
+
 from fastapi import FastAPI
+from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-import joblib
-import numpy as np
 import mysql.connector
 
-# IMPORT MODULE GEMINI LLM
-from api.llm_advisor import analyze_and_advise_with_llm
+from api.database_config import get_mysql_config
+from api.model_loader import ModelLoaderError, load_model_release
+from api.schemas import (
+    AnalysisResponse,
+    CANONICAL_ATTACK_TYPES,
+    PayloadRequest,
+)
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="AI-WebHoneypot Core Engine")
 
@@ -18,90 +28,266 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Tải model Local ML
-try:
-    model = joblib.load("models/model_rf.pkl")
-    vectorizer = joblib.load("models/vectorizer.pkl")
-except Exception:
-    model, vectorizer = None, None
+AI_ENGINE_ROOT = Path(__file__).resolve().parents[1]
+MODEL_RELEASE_ROOT = AI_ENGINE_ROOT / "artifacts" / "releases"
+AI_MODEL_RELEASE = os.getenv("AI_MODEL_RELEASE", "")
+AI_MODEL_CANDIDATE = os.getenv("AI_MODEL_CANDIDATE", "")
+VALID_ATTACK_TYPES = frozenset(CANONICAL_ATTACK_TYPES)
+LOCAL_MODEL_LABELS = VALID_ATTACK_TYPES
+# Keep the existing attack scores; Normal uses the minimum score in the API contract.
+LOCAL_RISK_SCORES = {"Normal": 1, "SQLi": 9, "XSS": 8}
 
-class PayloadRequest(BaseModel):
-    payload: str
 
-MYSQL_CONFIG = {
-    'host': 'database',
-    'user': 'root',
-    'password': 'rootpassword',
-    'database': 'ai_webhoneypot_db'
-}
+LOCAL_CONFIDENCE_THRESHOLD = 0.85
+
+
+def _load_local_model():
+    try:
+        loaded = load_model_release(
+            MODEL_RELEASE_ROOT,
+            AI_MODEL_RELEASE,
+            AI_MODEL_CANDIDATE,
+        )
+    except ModelLoaderError as exc:
+        logger.warning(
+            "Local ML model is unavailable (%s)", type(exc).__name__
+        )
+        return None, None, type(exc).__name__
+    except Exception as exc:
+        logger.error(
+            "Unexpected error loading configured Local ML model (%s)",
+            type(exc).__name__,
+        )
+        return None, None, type(exc).__name__
+    return loaded.model, loaded.transformer, None
+
+
+model, vectorizer, LOCAL_MODEL_LOAD_ERROR = _load_local_model()
+
+def _predict_local(payload: str):
+    if model is None or vectorizer is None:
+        return {
+            "source": "Local_ML",
+            "classification_status": "NEEDS_REVIEW",
+            "attack_type": None,
+            "confidence": None,
+            "risk_score": None,
+            "reason": "MODEL_UNAVAILABLE",
+            "recommendation": None,
+        }
+
+    try:
+        features = vectorizer.transform([payload])
+        predicted = model.predict(features)
+        probabilities = model.predict_proba(features)
+        classes = list(model.classes_)
+        if len(predicted) != 1 or len(probabilities) != 1:
+            raise ValueError("model returned an unexpected prediction shape")
+
+        attack_type = str(predicted[0])
+        if not isinstance(attack_type, str) or attack_type not in LOCAL_MODEL_LABELS:
+            raise ValueError("model returned an unsupported classification label")
+        if attack_type not in classes:
+            raise ValueError("model prediction is missing from its class list")
+
+        probability_row = probabilities[0]
+        if len(probability_row) != len(classes):
+            raise ValueError("model probability count does not match its classes")
+        probability_values = []
+        for value in probability_row:
+            if isinstance(value, bool):
+                raise ValueError("model returned a boolean confidence score")
+            probability = float(value)
+            if not math.isfinite(probability) or not 0 <= probability <= 1:
+                raise ValueError("model returned an invalid confidence score")
+            probability_values.append(probability)
+        if not math.isclose(
+            sum(probability_values), 1.0, rel_tol=1e-5, abs_tol=1e-5
+        ):
+            raise ValueError("model probabilities do not sum to one")
+        confidence = probability_values[classes.index(attack_type)]
+    except Exception as exc:
+        logger.warning("Local ML inference failed (%s)", type(exc).__name__)
+        return {
+            "source": "Local_ML",
+            "classification_status": "NEEDS_REVIEW",
+            "attack_type": None,
+            "confidence": None,
+            "risk_score": None,
+            "reason": "INFERENCE_ERROR",
+            "recommendation": None,
+        }
+
+    if confidence < LOCAL_CONFIDENCE_THRESHOLD:
+        logger.info(
+            "Local ML confidence %.4f is below threshold %.4f",
+            confidence,
+            LOCAL_CONFIDENCE_THRESHOLD,
+        )
+        return {
+            "source": "Local_ML",
+            "classification_status": "NEEDS_REVIEW",
+            "attack_type": None,
+            "confidence": confidence,
+            "risk_score": None,
+            "reason": "LOW_CONFIDENCE",
+            "recommendation": None,
+        }
+
+    result = {
+        "source": "Local_ML",
+        "classification_status": "CLASSIFIED",
+        "attack_type": attack_type,
+        "confidence": confidence,
+        "risk_score": LOCAL_RISK_SCORES[attack_type],
+        "reason": None,
+        "recommendation": None,
+    }
+    if attack_type == "SQLi":
+        result["recommendation"] = (
+            "Review SQL query construction and use parameterized statements."
+        )
+    elif attack_type == "XSS":
+        result["recommendation"] = (
+            "Review input handling and apply context-appropriate output encoding."
+        )
+    return result
+
 
 @app.get("/stats")
 def get_stats():
+    connection = None
+    cursor = None
+    error = None
+    result = None
     try:
-        conn = mysql.connector.connect(**MYSQL_CONFIG)
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT COUNT(*) AS total_logs FROM raw_logs")
-        total = cursor.fetchone()['total_logs']
-        cursor.execute("SELECT COUNT(*) AS sqli FROM ai_labels WHERE attack_type = 'SQLi'")
-        sqli = cursor.fetchone()['sqli']
-        cursor.execute("SELECT COUNT(*) AS xss FROM ai_labels WHERE attack_type = 'XSS'")
-        xss = cursor.fetchone()['xss']
-        cursor.execute("SELECT COUNT(DISTINCT client_ip) AS unique_ips FROM raw_logs")
-        ips = cursor.fetchone()['unique_ips']
-        conn.close()
-        return {"total_logs": total, "sqli_count": sqli, "xss_count": xss, "normal_count": max(0, total - sqli - xss), "unique_ips": ips}
-    except Exception:
-        return {"total_logs": 0, "sqli_count": 0, "xss_count": 0, "normal_count": 0, "unique_ips": 0}
+        connection = mysql.connector.connect(**get_mysql_config())
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute(
+            "SELECT COUNT(*) AS total_logs, "
+            "COUNT(DISTINCT client_ip) AS unique_ips FROM raw_logs"
+        )
+        totals = cursor.fetchone()
+        if not isinstance(totals, dict):
+            raise RuntimeError("database returned invalid total statistics")
+
+        cursor.execute(
+            """
+            SELECT latest.attack_type, COUNT(*) AS event_count
+            FROM raw_logs r
+            JOIN ai_labels latest ON latest.id = (
+                SELECT a2.id
+                FROM ai_labels a2
+                WHERE a2.log_id = r.id
+                ORDER BY a2.analyzed_at DESC, a2.id DESC
+                LIMIT 1
+            )
+            GROUP BY latest.attack_type
+            """
+        )
+        attack_counts = {
+            row["attack_type"]: row["event_count"]
+            for row in cursor.fetchall()
+        }
+
+        cursor.execute(
+            """
+            SELECT COUNT(*) AS unclassified_count
+            FROM raw_logs r
+            WHERE NOT EXISTS (
+                SELECT 1 FROM ai_labels a WHERE a.log_id = r.id
+            )
+            """
+        )
+        unclassified = cursor.fetchone()
+        if not isinstance(unclassified, dict):
+            raise RuntimeError("database returned invalid unclassified statistics")
+
+        result = {
+            "total_logs": totals["total_logs"],
+            "classified_count": sum(attack_counts.values()),
+            "unclassified_count": unclassified["unclassified_count"],
+            "attack_counts": attack_counts,
+            "sqli_count": attack_counts.get("SQLi", 0),
+            "xss_count": attack_counts.get("XSS", 0),
+            "normal_count": attack_counts.get("Normal", 0),
+            "unique_ips": totals["unique_ips"],
+        }
+    except Exception as exc:
+        error = exc
+
+    for resource in (cursor, connection):
+        if resource is not None:
+            try:
+                resource.close()
+            except Exception as exc:
+                if error is None:
+                    error = exc
+
+    if error is not None:
+        logger.error(
+            "Dashboard statistics query failed",
+            exc_info=(type(error), error, error.__traceback__),
+        )
+        raise HTTPException(
+            status_code=503,
+            detail="Dashboard statistics are temporarily unavailable",
+        ) from error
+    return result
 
 @app.get("/logs/live")
 def get_live_logs():
+    connection = None
+    cursor = None
+    error = None
+    rows = None
     try:
-        conn = mysql.connector.connect(**MYSQL_CONFIG)
-        cursor = conn.cursor(dictionary=True)
+        connection = mysql.connector.connect(**get_mysql_config())
+        cursor = connection.cursor(dictionary=True)
         query = """
-            SELECT r.client_ip, r.http_method, r.request_uri, a.attack_type, a.risk_score, r.created_at 
-            FROM raw_logs r 
-            JOIN ai_labels a ON r.id = a.log_id 
-            ORDER BY r.id DESC LIMIT 10
+            SELECT CAST(r.id AS CHAR) AS id,
+                   r.created_at, r.client_ip, r.http_method, r.request_uri,
+                   a.attack_type, a.confidence_score, a.risk_score,
+                   CASE
+                       WHEN a.id IS NULL THEN 'UNCLASSIFIED'
+                       ELSE 'CLASSIFIED'
+                   END AS classification_status,
+                   a.recommendation AS recommendation
+            FROM raw_logs r
+            LEFT JOIN ai_labels a ON a.id = (
+                SELECT a2.id
+                FROM ai_labels a2
+                WHERE a2.log_id = r.id
+                ORDER BY a2.analyzed_at DESC, a2.id DESC
+                LIMIT 1
+            )
+            ORDER BY r.id DESC
+            LIMIT 10
         """
         cursor.execute(query)
         rows = cursor.fetchall()
-        conn.close()
-        return rows
-    except Exception:
-        return []
+    except Exception as exc:
+        error = exc
 
-@app.post("/analyze")
+    for resource in (cursor, connection):
+        if resource is not None:
+            try:
+                resource.close()
+            except Exception as exc:
+                if error is None:
+                    error = exc
+
+    if error is not None:
+        logger.error(
+            "Live log query failed",
+            exc_info=(type(error), error, error.__traceback__),
+        )
+        raise HTTPException(
+            status_code=503,
+            detail="Live events are temporarily unavailable",
+        ) from error
+    return rows
+
+@app.post("/analyze", response_model=AnalysisResponse)
 def analyze(data: PayloadRequest):
-    payload = data.payload
-    
-    # ----------------------------------------------------
-    # TẦNG 1: Kiểm tra bằng Local ML (Tốc độ < 10ms)
-    # ----------------------------------------------------
-    if model and vectorizer:
-        X_vec = vectorizer.transform([payload])
-        probs = model.predict_proba(X_vec)
-        max_prob = float(np.max(probs))
-        predicted_class = model.predict(X_vec)[0]
-        
-        # Nếu Local ML tự tin >= 85%
-        if max_prob >= 0.85 and predicted_class != 'Normal':
-            return {
-                "source": "Local_ML",
-                "attack_type": predicted_class,
-                "confidence": round(max_prob, 2),
-                "risk_score": 9 if predicted_class == 'SQLi' else 8,
-                "recommendation": f"Cảnh báo {predicted_class}: Hãy áp dụng cơ chế Input Sanitization hoặc Prepared Statements."
-            }
-
-    # ----------------------------------------------------
-    # TẦNG 2: Gọi Gemini LLM API (Phân tích Zero-day & sinh lời khuyên)
-    # ----------------------------------------------------
-    llm_result = analyze_and_advise_with_llm(payload)
-    return {
-        "source": "Cloud_Gemini_LLM",
-        "attack_type": llm_result.get("attack_type", "Suspicious"),
-        "confidence": llm_result.get("confidence", 0.85),
-        "risk_score": llm_result.get("risk_score", 8),
-        "recommendation": llm_result.get("recommendation", "Phát hiện chuỗi mã hóa nghi vấn lẩn tránh.")
-    }
+    return _predict_local(data.payload)
