@@ -1,0 +1,14 @@
+{
+  "canonical_labels": [
+    "Normal",
+    "SQLi",
+    "XSS"
+  ],
+  "aliases": {
+    "normal": "Normal",
+    "sqli": "SQLi",
+    "sql_injection": "SQLi",
+    "xss": "XSS",
+    "cross_site_scripting": "XSS"
+  }
+}

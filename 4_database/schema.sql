@@ -11,7 +11,11 @@ CREATE TABLE IF NOT EXISTS raw_logs (
     request_uri TEXT NOT NULL,
     raw_payload TEXT,
     decoded_payload TEXT,
+    ingestion_key_hash BINARY(32) NULL,
+    ingestion_key_bytes MEDIUMBLOB NULL,
+    source_record_sha256 BINARY(32) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_raw_logs_ingestion_key_hash (ingestion_key_hash),
     INDEX idx_client_ip (client_ip)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -23,6 +27,7 @@ CREATE TABLE IF NOT EXISTS ai_labels (
     confidence_score FLOAT NOT NULL,
     risk_score INT NOT NULL,
     ai_source VARCHAR(50) DEFAULT 'Local_ML',
+    recommendation TEXT NULL,
     analyzed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (log_id) REFERENCES raw_logs(id) ON DELETE CASCADE,
     INDEX idx_attack_type (attack_type)

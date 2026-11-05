@@ -2,11 +2,10 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# Sửa dòng này: Copy file requirements.txt từ thư mục gốc demo/
-COPY requirements.txt .
+# Use the same pinned runtime dependencies as the host training environment.
+COPY 3_ai_engine/requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy mã nguồn trong thư mục 3_ai_engine
 COPY 3_ai_engine/ .
 
 EXPOSE 8000

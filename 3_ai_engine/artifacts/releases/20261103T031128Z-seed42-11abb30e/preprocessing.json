@@ -1,0 +1,6 @@
+{
+  "payload_preserved": true,
+  "duplicate_fingerprint_normalization": "Unicode NFC",
+  "payload_transform_for_model": "candidate-specific vectorizer",
+  "threshold_selection": "not performed"
+}

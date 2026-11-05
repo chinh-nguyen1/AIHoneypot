@@ -1,0 +1,4 @@
+{
+  "chat.disableAIFeatures": false,
+  "python.terminal.useEnvFile": true
+}

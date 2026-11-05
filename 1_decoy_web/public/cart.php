@@ -1,20 +1,13 @@
 <?php
+require_once __DIR__ . '/../config/request_logger.php';
+honeypot_log_http_request();
+
 require_once '../config/db.php';
 
 $order_code = $_GET['order_code'] ?? '';
 $search_result = '';
 
 if ($order_code) {
-    // Ghi log hành vi tra cứu đơn hàng
-    $log_entry = sprintf(
-        "[%s] IP: %s | Method: GET | URI: /cart.php?order_code=%s | Payload: order_code=%s\n",
-        date('Y-m-d H:i:s'),
-        $_SERVER['REMOTE_ADDR'],
-        urlencode($order_code),
-        $order_code
-    );
-    file_put_contents('../logs/access.log', $log_entry, FILE_APPEND);
-
     // CỐ Ý BỎ LỌC CÂU LỆNH SQL ĐỂ TẠO MỒI NHỬ SQL INJECTION TRA CỨU ĐƠN HÀNG
     $sql = "SELECT * FROM raw_logs WHERE client_ip = '$order_code'";
     $conn->query($sql);

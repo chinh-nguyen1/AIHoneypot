@@ -22,7 +22,7 @@ Khi Hacker tiến hành khai thác:
    - **Tầng 1 (Local ML - Random Forest):** Phân loại siêu tốc (< 10ms) với các mẫu tấn công đã biết.
    - **Tầng 2 (Cloud Gemini LLM):** Phân tích ngữ cảnh sâu các chuỗi lắt léo/Zero-day và tự động sinh 2 dòng đề xuất vá lỗi bằng tiếng Việt.
 4. **Cảnh báo khẩn (Email Alert):** Tự động gửi Email báo động đỏ tới Admin SOC khi điểm rủi ro \\(\ge 8/10\\).
-5. **SOC Admin Dashboard (ReactJS):** Hiển thị bảng chỉ số, biểu đồ xu hướng, bản đồ vị trí địa lý IP Hacker (Leaflet.js) và luồng log thời gian thực.
+5. **SOC Admin Dashboard (ReactJS):** Hiển thị thống kê, phân loại sự kiện và luồng log; bản đồ chỉ hiển thị khi có dữ liệu vị trí đã xác minh.
 6. **Đóng gói Docker:** 100% hệ thống vận hành cô lập trong 6 Docker Container (không cần cài XAMPP).
 
 ---
@@ -126,6 +126,10 @@ docker compose ps
 | **Attacker Console**    | Python / Pentest  | `http://localhost:8081`      |
 | **Lõi AI FastAPI Docs** | FastAPI / Swagger | `http://localhost:8000/docs` |
 | **Cơ sở dữ liệu MySQL** | MySQL 8.0         | `localhost:3306`             |
+
+Dashboard mặc định gọi AI Engine tại `http://localhost:8000`. Khi build frontend
+cho môi trường khác, cấu hình build argument `REACT_APP_API_BASE_URL` thành URL
+API mà trình duyệt người dùng có thể truy cập.
 
 ---
 

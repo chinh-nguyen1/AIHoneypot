@@ -1,0 +1,626 @@
+{
+  "schema_version": 1,
+  "release_version": "20261103T030930Z-seed42-695f6e00",
+  "created_at_utc": "2026-11-03T03:09:30.433323+00:00",
+  "preprocessing": {
+    "payload_preserved": true,
+    "duplicate_fingerprint_normalization": "Unicode NFC",
+    "payload_transform_for_model": "candidate-specific vectorizer",
+    "threshold_selection": "not performed"
+  },
+  "random_seed": 42,
+  "training_config": {
+    "random_seed": 42,
+    "batch_size": 512,
+    "n_features": 262144,
+    "incremental_epochs": 1,
+    "baseline_max_samples": 5000,
+    "baseline_max_total_payload_chars": 5000000,
+    "baseline_max_payload_chars": 100000,
+    "small_class_warning_threshold": 20
+  },
+  "dataset_provenance": [
+    {
+      "source_file": "E:\\AIHoneypot\\3_ai_engine\\data\\processed\\dataset_request_format.csv",
+      "size_bytes": 8385,
+      "sha256": "7bbb97d234d7b33cf9a503144967f53ad51ee2b826dcf6d2c40e3ecb450927a4"
+    }
+  ],
+  "import_stats": {
+    "records_read": 75,
+    "valid_records": 75,
+    "rejected_records": 0,
+    "label_counts": {
+      "SQLi": 25,
+      "XSS": 25,
+      "Normal": 25
+    },
+    "empty_payloads": 0,
+    "duplicate_payloads": 0
+  },
+  "normalization_stats": {
+    "total_records": 75,
+    "valid_records": 75,
+    "rejected_records": 0,
+    "duplicate_records": 0,
+    "conflicting_records": 0,
+    "unique_records": 75,
+    "counts_by_label": {
+      "SQLi": 25,
+      "XSS": 25,
+      "Normal": 25
+    },
+    "counts_by_reject_reason": {}
+  },
+  "eligible_unique_records": 75,
+  "split_counts": {
+    "train": {
+      "Normal": 17,
+      "SQLi": 17,
+      "XSS": 17
+    },
+    "validation": {
+      "Normal": 4,
+      "SQLi": 4,
+      "XSS": 4
+    },
+    "test": {
+      "Normal": 4,
+      "SQLi": 4,
+      "XSS": 4
+    }
+  },
+  "split_assignment_sha256": "f89b738378638b103d84de565fe2ce8e4f6cbcb8c8c85e10838d0d994bfe218a",
+  "candidates": {
+    "alternative": {
+      "status": "completed",
+      "classes": [
+        "Normal",
+        "SQLi",
+        "XSS"
+      ],
+      "training_duration_seconds": 0.021648800000548363,
+      "config": {
+        "vectorizer": "HashingVectorizer",
+        "analyzer": "char",
+        "ngram_range": [
+          1,
+          3
+        ],
+        "alternate_sign": false,
+        "norm": "l2",
+        "n_features": 262144,
+        "classifier": "SGDClassifier",
+        "loss": "log_loss",
+        "incremental_epochs": 1,
+        "random_state": 42
+      },
+      "metrics": {
+        "validation": {
+          "accuracy": 0.5833333333333334,
+          "per_class": {
+            "Normal": {
+              "precision": 0.75,
+              "recall": 0.75,
+              "f1": 0.75,
+              "support": 4
+            },
+            "SQLi": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 4
+            },
+            "XSS": {
+              "precision": 0.5,
+              "recall": 1.0,
+              "f1": 0.6666666666666666,
+              "support": 4
+            }
+          },
+          "macro_f1": 0.47222222222222215,
+          "confusion_matrix": [
+            [
+              3,
+              0,
+              1
+            ],
+            [
+              1,
+              0,
+              3
+            ],
+            [
+              0,
+              0,
+              4
+            ]
+          ],
+          "class_order": [
+            "Normal",
+            "SQLi",
+            "XSS"
+          ],
+          "total_samples": 12,
+          "zero_division": 0,
+          "evaluation_duration_seconds": 0.008944400120526552
+        },
+        "test": {
+          "accuracy": 0.6666666666666666,
+          "per_class": {
+            "Normal": {
+              "precision": 0.5714285714285714,
+              "recall": 1.0,
+              "f1": 0.7272727272727273,
+              "support": 4
+            },
+            "SQLi": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 4
+            },
+            "XSS": {
+              "precision": 0.8,
+              "recall": 1.0,
+              "f1": 0.888888888888889,
+              "support": 4
+            }
+          },
+          "macro_f1": 0.5387205387205388,
+          "confusion_matrix": [
+            [
+              4,
+              0,
+              0
+            ],
+            [
+              3,
+              0,
+              1
+            ],
+            [
+              0,
+              0,
+              4
+            ]
+          ],
+          "class_order": [
+            "Normal",
+            "SQLi",
+            "XSS"
+          ],
+          "total_samples": 12,
+          "zero_division": 0,
+          "evaluation_duration_seconds": 0.00680350000038743
+        }
+      },
+      "name": "alternative",
+      "model_filename": "model.joblib",
+      "transformer_filename": "feature_transform.joblib",
+      "algorithm": {
+        "classifier": "SGDClassifier",
+        "transformer": "HashingVectorizer"
+      },
+      "canonical_classes": [
+        "Normal",
+        "SQLi",
+        "XSS"
+      ],
+      "training_configuration": {
+        "vectorizer": "HashingVectorizer",
+        "analyzer": "char",
+        "ngram_range": [
+          1,
+          3
+        ],
+        "alternate_sign": false,
+        "norm": "l2",
+        "n_features": 262144,
+        "classifier": "SGDClassifier",
+        "loss": "log_loss",
+        "incremental_epochs": 1,
+        "random_state": 42
+      },
+      "evaluation_metrics": {
+        "validation": {
+          "accuracy": 0.5833333333333334,
+          "per_class": {
+            "Normal": {
+              "precision": 0.75,
+              "recall": 0.75,
+              "f1": 0.75,
+              "support": 4
+            },
+            "SQLi": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 4
+            },
+            "XSS": {
+              "precision": 0.5,
+              "recall": 1.0,
+              "f1": 0.6666666666666666,
+              "support": 4
+            }
+          },
+          "macro_f1": 0.47222222222222215,
+          "confusion_matrix": [
+            [
+              3,
+              0,
+              1
+            ],
+            [
+              1,
+              0,
+              3
+            ],
+            [
+              0,
+              0,
+              4
+            ]
+          ],
+          "class_order": [
+            "Normal",
+            "SQLi",
+            "XSS"
+          ],
+          "total_samples": 12,
+          "zero_division": 0,
+          "evaluation_duration_seconds": 0.008944400120526552
+        },
+        "test": {
+          "accuracy": 0.6666666666666666,
+          "per_class": {
+            "Normal": {
+              "precision": 0.5714285714285714,
+              "recall": 1.0,
+              "f1": 0.7272727272727273,
+              "support": 4
+            },
+            "SQLi": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 4
+            },
+            "XSS": {
+              "precision": 0.8,
+              "recall": 1.0,
+              "f1": 0.888888888888889,
+              "support": 4
+            }
+          },
+          "macro_f1": 0.5387205387205388,
+          "confusion_matrix": [
+            [
+              4,
+              0,
+              0
+            ],
+            [
+              3,
+              0,
+              1
+            ],
+            [
+              0,
+              0,
+              4
+            ]
+          ],
+          "class_order": [
+            "Normal",
+            "SQLi",
+            "XSS"
+          ],
+          "total_samples": 12,
+          "zero_division": 0,
+          "evaluation_duration_seconds": 0.00680350000038743
+        }
+      },
+      "bundle_files": {
+        "model": "model.joblib",
+        "feature_transform": "feature_transform.joblib"
+      }
+    },
+    "baseline": {
+      "status": "completed",
+      "training_duration_seconds": 0.13891890016384423,
+      "config": {
+        "vectorizer": "TfidfVectorizer",
+        "analyzer": "char",
+        "ngram_range": [
+          1,
+          3
+        ],
+        "classifier": "RandomForestClassifier",
+        "n_estimators": 100,
+        "random_state": 42,
+        "safety_limit_train_samples": 5000,
+        "safety_limit_total_payload_chars": 5000000,
+        "safety_limit_individual_payload_chars": 100000
+      },
+      "metrics": {
+        "validation": {
+          "accuracy": 0.8333333333333334,
+          "per_class": {
+            "Normal": {
+              "precision": 1.0,
+              "recall": 0.5,
+              "f1": 0.6666666666666666,
+              "support": 4
+            },
+            "SQLi": {
+              "precision": 0.6666666666666666,
+              "recall": 1.0,
+              "f1": 0.8,
+              "support": 4
+            },
+            "XSS": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 4
+            }
+          },
+          "macro_f1": 0.8222222222222223,
+          "confusion_matrix": [
+            [
+              2,
+              2,
+              0
+            ],
+            [
+              0,
+              4,
+              0
+            ],
+            [
+              0,
+              0,
+              4
+            ]
+          ],
+          "class_order": [
+            "Normal",
+            "SQLi",
+            "XSS"
+          ],
+          "total_samples": 12,
+          "zero_division": 0,
+          "evaluation_duration_seconds": 0.005182299995794892
+        },
+        "test": {
+          "accuracy": 0.75,
+          "per_class": {
+            "Normal": {
+              "precision": 1.0,
+              "recall": 0.25,
+              "f1": 0.4,
+              "support": 4
+            },
+            "SQLi": {
+              "precision": 0.5714285714285714,
+              "recall": 1.0,
+              "f1": 0.7272727272727273,
+              "support": 4
+            },
+            "XSS": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 4
+            }
+          },
+          "macro_f1": 0.7090909090909091,
+          "confusion_matrix": [
+            [
+              1,
+              3,
+              0
+            ],
+            [
+              0,
+              4,
+              0
+            ],
+            [
+              0,
+              0,
+              4
+            ]
+          ],
+          "class_order": [
+            "Normal",
+            "SQLi",
+            "XSS"
+          ],
+          "total_samples": 12,
+          "zero_division": 0,
+          "evaluation_duration_seconds": 0.006221400108188391
+        }
+      },
+      "classes": [
+        "Normal",
+        "SQLi",
+        "XSS"
+      ],
+      "name": "baseline",
+      "model_filename": "model.joblib",
+      "transformer_filename": "feature_transform.joblib",
+      "algorithm": {
+        "classifier": "RandomForestClassifier",
+        "transformer": "TfidfVectorizer"
+      },
+      "canonical_classes": [
+        "Normal",
+        "SQLi",
+        "XSS"
+      ],
+      "training_configuration": {
+        "vectorizer": "TfidfVectorizer",
+        "analyzer": "char",
+        "ngram_range": [
+          1,
+          3
+        ],
+        "classifier": "RandomForestClassifier",
+        "n_estimators": 100,
+        "random_state": 42,
+        "safety_limit_train_samples": 5000,
+        "safety_limit_total_payload_chars": 5000000,
+        "safety_limit_individual_payload_chars": 100000
+      },
+      "evaluation_metrics": {
+        "validation": {
+          "accuracy": 0.8333333333333334,
+          "per_class": {
+            "Normal": {
+              "precision": 1.0,
+              "recall": 0.5,
+              "f1": 0.6666666666666666,
+              "support": 4
+            },
+            "SQLi": {
+              "precision": 0.6666666666666666,
+              "recall": 1.0,
+              "f1": 0.8,
+              "support": 4
+            },
+            "XSS": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 4
+            }
+          },
+          "macro_f1": 0.8222222222222223,
+          "confusion_matrix": [
+            [
+              2,
+              2,
+              0
+            ],
+            [
+              0,
+              4,
+              0
+            ],
+            [
+              0,
+              0,
+              4
+            ]
+          ],
+          "class_order": [
+            "Normal",
+            "SQLi",
+            "XSS"
+          ],
+          "total_samples": 12,
+          "zero_division": 0,
+          "evaluation_duration_seconds": 0.005182299995794892
+        },
+        "test": {
+          "accuracy": 0.75,
+          "per_class": {
+            "Normal": {
+              "precision": 1.0,
+              "recall": 0.25,
+              "f1": 0.4,
+              "support": 4
+            },
+            "SQLi": {
+              "precision": 0.5714285714285714,
+              "recall": 1.0,
+              "f1": 0.7272727272727273,
+              "support": 4
+            },
+            "XSS": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 4
+            }
+          },
+          "macro_f1": 0.7090909090909091,
+          "confusion_matrix": [
+            [
+              1,
+              3,
+              0
+            ],
+            [
+              0,
+              4,
+              0
+            ],
+            [
+              0,
+              0,
+              4
+            ]
+          ],
+          "class_order": [
+            "Normal",
+            "SQLi",
+            "XSS"
+          ],
+          "total_samples": 12,
+          "zero_division": 0,
+          "evaluation_duration_seconds": 0.006221400108188391
+        }
+      },
+      "bundle_files": {
+        "model": "model.joblib",
+        "feature_transform": "feature_transform.joblib"
+      }
+    }
+  },
+  "comparison": {
+    "status": "complete",
+    "evaluated_split": "validation",
+    "final_test_metrics_reported_independently": true,
+    "higher_macro_f1": "baseline",
+    "per_class": {
+      "Normal": {
+        "baseline_f1": 0.6666666666666666,
+        "alternative_f1": 0.75,
+        "higher_f1": "alternative"
+      },
+      "SQLi": {
+        "baseline_f1": 0.8,
+        "alternative_f1": 0.0,
+        "higher_f1": "baseline"
+      },
+      "XSS": {
+        "baseline_f1": 1.0,
+        "alternative_f1": 0.6666666666666666,
+        "higher_f1": "baseline"
+      }
+    },
+    "training_duration_seconds": {
+      "baseline": 0.13891890016384423,
+      "alternative": 0.021648800000548363
+    },
+    "limitations": [
+      "The baseline is limited by the configured training-sample safety cap.",
+      "Training duration alone does not establish model quality."
+    ]
+  },
+  "threshold_selection": {
+    "performed": false,
+    "reason": "Serving confidence-threshold tuning is not part of this offline pipeline.",
+    "test_data_used": false
+  },
+  "library_versions": {
+    "python": "3.12.10",
+    "scikit_learn": "1.4.1.post1",
+    "joblib": "1.3.2",
+    "numpy": "1.26.4"
+  }
+}

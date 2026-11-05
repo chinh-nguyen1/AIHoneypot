@@ -1,6 +1,9 @@
 import React from "react";
 
 export default function AIAdvisorCard({ recommendation }) {
+  const hasRecommendation =
+    typeof recommendation === "string" && recommendation.trim().length > 0;
+
   return (
     <div
       style={{
@@ -16,8 +19,9 @@ export default function AIAdvisorCard({ recommendation }) {
         🤖 AI Security Advisor - Khuyến Nghị Khắc Phục
       </h4>
       <p style={{ margin: 0, fontSize: "14px", lineHeight: "1.5" }}>
-        {recommendation ||
-          "Chưa phát hiện lỗ hổng nghiêm trọng mới. Hệ thống Web bẫy đang hoạt động ổn định."}
+        {hasRecommendation
+          ? recommendation
+          : "Chưa có khuyến nghị từ response API hiện tại."}
       </p>
     </div>
   );

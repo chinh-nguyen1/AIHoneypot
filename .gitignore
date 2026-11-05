@@ -22,3 +22,11 @@ Thumbs.db
 
 # Database files (only generated local databases)
 *.sqlite3
+# Python virtual environments
+/.venv-ai/
+/3_ai_engine/.venv-ai312/
+/.venv-pipeline/
+# Node.js dependencies
+node_modules/
+# Frontend build output
+/5_frontend_dashboard/build/

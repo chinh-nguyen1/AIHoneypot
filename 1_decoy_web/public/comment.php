@@ -1,29 +1,46 @@
 <?php
+require_once __DIR__ . '/../config/request_logger.php';
+honeypot_log_http_request();
+
 require_once '../config/db.php';
 
 // Tải danh sách bình luận đã lưu từ file JSON
 $comments_file = '../logs/comments.json';
-$comments = file_exists($comments_file) ? json_decode(file_get_content($comments_file), true) : [];
+$comments = [];
+if (is_file($comments_file)) {
+    $comments_json = file_get_contents($comments_file);
+    if ($comments_json === false) {
+        error_log('AI-WebHoneypot could not read the comments file: ' . $comments_file);
+    } else {
+        $decoded_comments = json_decode($comments_json, true);
+        if (is_array($decoded_comments)) {
+            $comments = $decoded_comments;
+        } elseif (json_last_error() !== JSON_ERROR_NONE) {
+            error_log('AI-WebHoneypot comments file contains invalid JSON: ' . $comments_file);
+        } else {
+            error_log('AI-WebHoneypot comments file does not contain a JSON array: ' . $comments_file);
+        }
+    }
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $author = $_POST['author'] ?? 'Khách';
     $content = $_POST['content'] ?? '';
 
-    // Ghi log hành vi gửi bình luận
-    $log_entry = sprintf(
-        "[%s] IP: %s | Method: POST | URI: /comment.php | Payload: author=%s&content=%s\n",
-        date('Y-m-d H:i:s'),
-        $_SERVER['REMOTE_ADDR'],
-        $author,
-        $content
-    );
-    file_put_contents('../logs/access.log', $log_entry, FILE_APPEND);
-
-    // CỐ Ý LƯU TRỰC TIẾP CHUỖI KHÔNG SANITIZE ĐỂ TẠO BẪY STORED XSS
+    // Keep the original value for honeypot analysis; escape it only when rendered.
     if (!empty($content)) {
         $comments[] = ['author' => $author, 'content' => $content, 'time' => date('H:i d/m/Y')];
         file_put_contents($comments_file, json_encode($comments));
     }
+}
+
+function honeypot_escape_comment_output($value): string
+{
+    if (!is_scalar($value)) {
+        return '';
+    }
+
+    return htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
 ?>
 <!DOCTYPE html>
@@ -46,9 +63,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php if (!empty($comments)): ?>
             <?php foreach (array_reverse($comments) as $c): ?>
                 <div style="background: #f8f9fa; padding: 12px; margin-bottom: 10px; border-left: 4px solid #007bff; border-radius: 4px;">
-                    <b><?= $c['author'] ?></b> <small style="color: #888;">(<?= $c['time'] ?>)</small>
-                    <!-- CỐ Ý IN KHÔNG ESCAPE HTMLSPECIALCHARS ĐỂ KÍCH HOẠT STORED XSS -->
-                    <p style="margin: 5px 0 0 0;"><?= $c['content'] ?></p> 
+                    <b><?= honeypot_escape_comment_output($c['author'] ?? '') ?></b> <small style="color: #888;">(<?= honeypot_escape_comment_output($c['time'] ?? '') ?>)</small>
+                    <p style="margin: 5px 0 0 0;"><?= honeypot_escape_comment_output($c['content'] ?? '') ?></p>
                 </div>
             <?php endforeach; ?>
         <?php else: ?>

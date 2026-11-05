@@ -1,17 +1,10 @@
 <?php
+require_once __DIR__ . '/../config/request_logger.php';
+honeypot_log_http_request();
+
 require_once '../config/db.php';
 
 $product_id = $_GET['id'] ?? '1';
-
-// Ghi log tham số URL (Hacker thường thử chèn ' OR 1=1 vào tham số id)
-$log_entry = sprintf(
-    "[%s] IP: %s | Method: GET | URI: /product_detail.php?id=%s | Payload: id=%s\n",
-    date('Y-m-d H:i:s'),
-    $_SERVER['REMOTE_ADDR'],
-    urlencode($product_id),
-    $product_id
-);
-file_put_contents('../logs/access.log', $log_entry, FILE_APPEND);
 
 // CỐ Ý BỎ LỌC ĐỂ TẠO MỒI NHỬ SQL INJECTION QUA THAM SỐ GET ?id=
 $sql = "SELECT * FROM raw_logs WHERE id = $product_id"; 

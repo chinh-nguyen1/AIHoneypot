@@ -1,20 +1,13 @@
 <?php
+require_once __DIR__ . '/../config/request_logger.php';
+honeypot_log_http_request();
+
 require_once '../config/db.php';
 
 $message = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
-
-    // GHI LOG THÔ RA FILE access.log
-    $log_entry = sprintf(
-        "[%s] IP: %s | Method: POST | URI: /login.php | Payload: username=%s&password=%s\n",
-        date('Y-m-d H:i:s'),
-        $_SERVER['REMOTE_ADDR'],
-        $username,
-        $password
-    );
-    file_put_contents('../logs/access.log', $log_entry, FILE_APPEND);
 
     // CỐ Ý KHÔNG FILTER ĐỂ TẠO BẪY SQLi
     $sql = "SELECT * FROM raw_logs WHERE raw_payload = '$username'";

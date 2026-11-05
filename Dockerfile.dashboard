@@ -1,6 +1,8 @@
 # Giai đoạn 1: Build ReactJS từ thư mục 5_frontend_dashboard/
 FROM node:18-alpine AS build
 WORKDIR /app
+ARG REACT_APP_API_BASE_URL=http://localhost:8000
+ENV REACT_APP_API_BASE_URL=$REACT_APP_API_BASE_URL
 COPY 5_frontend_dashboard/package*.json ./
 RUN npm install
 COPY 5_frontend_dashboard/ .

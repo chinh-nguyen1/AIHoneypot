@@ -1,10 +1,6 @@
 FROM mysql:8.0
 
-ENV MYSQL_ROOT_PASSWORD=rootpassword
-ENV MYSQL_DATABASE=ai_webhoneypot_db
-
-# Copy và tự động nạp dữ liệu từ 4_database/
+# Copy cấu trúc database từ 4_database/
 COPY 4_database/schema.sql /docker-entrypoint-initdb.d/1_schema.sql
-COPY 4_database/seed_data.sql /docker-entrypoint-initdb.d/2_seed_data.sql
 
 EXPOSE 3306

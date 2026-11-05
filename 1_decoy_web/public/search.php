@@ -1,16 +1,9 @@
 <?php
+require_once __DIR__ . '/../config/request_logger.php';
+honeypot_log_http_request();
+
 $query = $_GET['q'] ?? '';
 
-if ($query) {
-    $log_entry = sprintf(
-        "[%s] IP: %s | Method: GET | URI: /search.php?q=%s | Payload: %s\n",
-        date('Y-m-d H:i:s'),
-        $_SERVER['REMOTE_ADDR'],
-        urlencode($query),
-        $query
-    );
-    file_put_contents('../logs/access.log', $log_entry, FILE_APPEND);
-}
 ?>
 <!DOCTYPE html>
 <html lang="vi">

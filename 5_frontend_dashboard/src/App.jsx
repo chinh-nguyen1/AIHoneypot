@@ -1,80 +1,117 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import OverviewCards from "./components/OverviewCards";
 import AIAdvisorCard from "./components/AIAdvisorCard";
 import LiveLogTable from "./components/LiveLogTable";
 import AttackChart from "./components/AttackChart";
 import ThreatMap from "./components/ThreatMap";
 import AlertToast from "./components/AlertToast";
+import { fetchDashboardStats, fetchLiveLogs } from "./services/api";
+
+function initialRequestState() {
+  return { data: null, loading: true, refreshing: false, error: null };
+}
+
+function errorMessage(error) {
+  return error instanceof Error ? error.message : "Đã xảy ra lỗi không xác định.";
+}
 
 export default function App() {
-  // Khởi tạo state rỗng ban đầu (sẽ được tự động lấp đầy từ CSDL)
-  const [stats, setStats] = useState({
-    total_logs: 0,
-    sqli_count: 0,
-    xss_count: 0,
-    normal_count: 0,
-    unique_ips: 0,
-  });
-  const [logs, setLogs] = useState([]);
-  const [recommendation, setRecommendation] = useState(
-    "Hệ thống đang sẵn sàng giám sát và tiếp nhận phân tích từ AI...",
-  );
+  const [statsState, setStatsState] = useState(initialRequestState);
+  const [logsState, setLogsState] = useState(initialRequestState);
+  const [recommendation, setRecommendation] = useState(null);
   const [activeAlert, setActiveAlert] = useState(null);
-  const [lastAlertTime, setLastAlertTime] = useState(null);
+  const lastAlertEventId = useRef(null);
 
   useEffect(() => {
-    // Hàm lấy dữ liệu thời gian thực từ AI Engine Backend
+    let active = true;
+
     const fetchLiveData = async () => {
-      try {
-        // 1. Tải thẻ số liệu thống kê tổng hợp
-        const resStats = await fetch("http://localhost:8000/stats");
-        if (resStats.ok) {
-          const dataStats = await resStats.json();
-          setStats(dataStats);
-        }
+      setStatsState((current) => ({
+        ...current,
+        loading: current.data === null,
+        refreshing: current.data !== null,
+      }));
+      setLogsState((current) => ({
+        ...current,
+        loading: current.data === null,
+        refreshing: current.data !== null,
+      }));
 
-        // 2. Tải danh sách log mới nhất từ CSDL
-        const resLogs = await fetch("http://localhost:8000/logs/live");
-        if (resLogs.ok) {
-          const dataLogs = await resLogs.json();
-          setLogs(dataLogs);
+      const [statsResult, logsResult] = await Promise.allSettled([
+        fetchDashboardStats(),
+        fetchLiveLogs(),
+      ]);
+      if (!active) return;
 
-          // Nếu có log mới và điểm rủi ro cao (>= 8/10) -> Kích hoạt Popup Cảnh báo
-          if (dataLogs && dataLogs.length > 0) {
-            const latestLog = dataLogs[0];
+      if (statsResult.status === "fulfilled") {
+        setStatsState({
+          data: statsResult.value,
+          loading: false,
+          refreshing: false,
+          error: null,
+        });
+      } else {
+        setStatsState((current) => ({
+          ...current,
+          loading: false,
+          refreshing: false,
+          error: errorMessage(statsResult.reason),
+        }));
+      }
 
-            // Chỉ bật Toast nếu là cuộc tấn công mới chưa được báo trước đó
+      if (logsResult.status === "fulfilled") {
+        const logs = logsResult.value;
+        setLogsState({
+          data: logs,
+          loading: false,
+          refreshing: false,
+          error: null,
+        });
+
+        const latestLog = logs[0];
+        if (latestLog) {
+          setRecommendation(
+            typeof latestLog.recommendation === "string" &&
+              latestLog.recommendation.trim()
+              ? latestLog.recommendation
+              : null,
+          );
+
+          if (
+            latestLog.classification_status === "CLASSIFIED" &&
+            latestLog.attack_type &&
+            typeof latestLog.risk_score === "number"
+          ) {
             if (
-              latestLog.risk_score >= 8 &&
-              latestLog.created_at !== lastAlertTime
+              latestLog.id !== lastAlertEventId.current &&
+              latestLog.risk_score >= 8
             ) {
-              setActiveAlert({
-                client_ip: latestLog.client_ip,
-                attack_type: latestLog.attack_type,
-                risk_score: latestLog.risk_score,
-              });
-              setLastAlertTime(latestLog.created_at);
+              setActiveAlert(latestLog);
             }
-
-            // Cập nhật lời khuyên vá lỗi mới nhất từ AI
-            if (latestLog.recommendation) {
-              setRecommendation(latestLog.recommendation);
-            }
+            lastAlertEventId.current = latestLog.id;
           }
+        } else {
+          setRecommendation(null);
         }
-      } catch (error) {
-        console.error(
-          "Lỗi kết nối tới Server Backend (http://localhost:8000):",
-          error,
-        );
+      } else {
+        setRecommendation(null);
+        setLogsState((current) => ({
+          ...current,
+          loading: false,
+          refreshing: false,
+          error: errorMessage(logsResult.reason),
+        }));
       }
     };
 
-    fetchLiveData(); // Tải ngay lập tức khi vừa vào trang
-    const interval = setInterval(fetchLiveData, 2000); // Tự động làm mới dữ liệu mỗi 2 giây
+    fetchLiveData();
+    const interval = setInterval(fetchLiveData, 2000);
 
-    return () => clearInterval(interval);
-  }, [lastAlertTime]);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, []);
 
   return (
     <div
@@ -100,24 +137,34 @@ export default function App() {
         </p>
       </header>
 
-      {/* Thẻ thống kê tổng quan */}
-      <OverviewCards stats={stats} />
+      <OverviewCards
+        stats={statsState.data}
+        loading={statsState.loading}
+        refreshing={statsState.refreshing}
+        error={statsState.error}
+      />
 
-      {/* Biểu đồ phân bổ tấn công và Bản đồ IP */}
       <div
         style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}
       >
-        <AttackChart stats={stats} />
-        <ThreatMap threatIps={[]} />
+        <AttackChart
+          stats={statsState.data}
+          loading={statsState.loading}
+          refreshing={statsState.refreshing}
+          error={statsState.error}
+        />
+        <ThreatMap locations={[]} />
       </div>
 
-      {/* Khuyến nghị vá lỗi từ Gemini LLM AI */}
       <AIAdvisorCard recommendation={recommendation} />
 
-      {/* Bảng Log thời gian thực */}
-      <LiveLogTable logs={logs} />
+      <LiveLogTable
+        logs={logsState.data}
+        loading={logsState.loading}
+        refreshing={logsState.refreshing}
+        error={logsState.error}
+      />
 
-      {/* Popup Cảnh báo khẩn khi Risk Score >= 8 */}
       <AlertToast
         alertData={activeAlert}
         onClose={() => setActiveAlert(null)}

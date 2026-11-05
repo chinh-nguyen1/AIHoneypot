@@ -9,22 +9,34 @@ load_dotenv()
 # Lấy GEMINI_API_KEY
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 
+
+class LLMInvalidResponseError(ValueError):
+    """Raised when Gemini returns JSON that is malformed or not an object."""
+
+
 if GEMINI_API_KEY and GEMINI_API_KEY != "YOUR_GEMINI_API_KEY":
     genai.configure(api_key=GEMINI_API_KEY)
+
+
+def _parse_llm_response(response_text: str) -> dict:
+    try:
+        result = json.loads(response_text)
+    except (json.JSONDecodeError, TypeError) as exc:
+        raise LLMInvalidResponseError("Gemini returned invalid JSON") from exc
+
+    if not isinstance(result, dict):
+        raise LLMInvalidResponseError("Gemini JSON response must be an object")
+    return result
+
 
 def analyze_and_advise_with_llm(payload: str) -> dict:
     """
     Gửi payload nghi vấn tới Gemini LLM để phân tích ngữ cảnh
     và tạo ra hướng dẫn khắc phục ngắn gọn cho Admin SOC.
     """
-    # Nếu chưa có API Key hợp lệ -> Trả về kết quả mặc định an toàn
+    # Missing credentials are an unavailable service, not a classification result.
     if not GEMINI_API_KEY or GEMINI_API_KEY == "YOUR_GEMINI_API_KEY":
-        return {
-            "attack_type": "Suspicious_Payload",
-            "confidence": 0.85,
-            "risk_score": 8,
-            "recommendation": "Phát hiện payload nghi vấn. Hãy kiểm tra và áp dụng cơ chế lọc dữ liệu đầu vào (Input Sanitization)."
-        }
+        raise RuntimeError("Gemini API key is not configured")
 
     prompt = f"""
     Bạn là một chuyên gia An ninh mạng SOC Senior. Hãy phân tích payload HTTP dưới đây từ hệ thống bẫy Web:
@@ -32,7 +44,7 @@ def analyze_and_advise_with_llm(payload: str) -> dict:
     Payload: "{payload}"
 
     Yêu cầu trả về chính xác định dạng JSON gồm các trường:
-    1. "attack_type": Loại tấn công (SQLi, XSS, RCE, Path_Traversal, hoặc Suspicious).
+    1. "attack_type": Nhãn phân loại, chỉ được là Normal, SQLi hoặc XSS.
     2. "confidence": Độ tự tin từ 0.0 đến 1.0.
     3. "risk_score": Điểm rủi ro từ 1 đến 10.
     4. "recommendation": Đúng 2 dòng bằng tiếng Việt hướng dẫn Admin cách vá lỗi triệt để trên hệ thống thật.
@@ -41,27 +53,21 @@ def analyze_and_advise_with_llm(payload: str) -> dict:
     """
 
     try:
-        # Khởi tạo mô hình Gemini
         model = genai.GenerativeModel('gemini-1.5-flash')
         response = model.generate_content(
             prompt,
             generation_config={"response_mime_type": "application/json"}
         )
-        return json.loads(response.text)
     except Exception as e:
         print(f"[-] Lỗi gọi Gemini API: {e}")
-        # Thử lại với tên mô hình fallback nếu gemini-1.5-flash báo lỗi 404
         try:
             model = genai.GenerativeModel('gemini-pro')
             response = model.generate_content(prompt)
-            # Làm sạch chuỗi trả về nếu có markdown ```json
             clean_text = response.text.replace("```json", "").replace("```", "").strip()
-            return json.loads(clean_text)
+            return _parse_llm_response(clean_text)
+        except LLMInvalidResponseError:
+            raise
         except Exception as err:
             print(f"[-] Fallback Gemini API thất bại: {err}")
-            return {
-                "attack_type": "Suspicious_Obfuscated",
-                "confidence": 0.80,
-                "risk_score": 8,
-                "recommendation": "Chuỗi mã hóa nghi vấn lẩn tránh. Cần kiểm tra kỹ các tham số mã hóa URL/Base64 và ép kiểu dữ liệu chặt chẽ."
-            }
+            raise RuntimeError("Gemini analysis is unavailable") from err
+    return _parse_llm_response(response.text)

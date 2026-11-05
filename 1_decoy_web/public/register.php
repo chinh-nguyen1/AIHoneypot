@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/../config/request_logger.php';
+honeypot_log_http_request();
+
 require_once '../config/db.php';
 
 $message = '';
@@ -6,17 +9,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $fullname = $_POST['fullname'] ?? '';
     $email = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
-
-    // Ghi nhận log đăng ký
-    $log_entry = sprintf(
-        "[%s] IP: %s | Method: POST | URI: /register.php | Payload: fullname=%s&email=%s&password=%s\n",
-        date('Y-m-d H:i:s'),
-        $_SERVER['REMOTE_ADDR'],
-        $fullname,
-        $email,
-        $password
-    );
-    file_put_contents('../logs/access.log', $log_entry, FILE_APPEND);
 
     $message = "<div style='color:green;'>Đăng ký tài khoản thành công! <a href='login.php'>Đăng nhập ngay</a></div>";
 }

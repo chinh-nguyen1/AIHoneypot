@@ -52,7 +52,7 @@ export default function AlertToast({ alertData, onClose }) {
       </div>
       <hr style={{ borderColor: "rgba(255,255,255,0.3)", margin: "10px 0" }} />
       <p style={{ margin: "5px 0" }}>
-        <b>IP Hacker:</b>{" "}
+        <b>IP nguồn:</b>{" "}
         <code
           style={{
             background: "#fff",
@@ -65,23 +65,14 @@ export default function AlertToast({ alertData, onClose }) {
         </code>
       </p>
       <p style={{ margin: "5px 0" }}>
-        <b>Loại tấn công:</b> {alertData.attack_type}
+        <b>Phân loại:</b>{" "}
+        {alertData.attack_type || "Chưa có phân loại AI"}
       </p>
       <p style={{ margin: "5px 0" }}>
         <b>Điểm rủi ro:</b>{" "}
         <span style={{ fontSize: "18px", fontWeight: "bold" }}>
           {alertData.risk_score}/10
         </span>
-      </p>
-      <p
-        style={{
-          margin: "5px 0",
-          fontSize: "12px",
-          fontStyle: "italic",
-          opacity: 0.9,
-        }}
-      >
-        Hệ thống đã tự động gửi Email báo động khẩn cấp tới Admin!
       </p>
     </div>
   );

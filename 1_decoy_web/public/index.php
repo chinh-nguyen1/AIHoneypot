@@ -1,13 +1,8 @@
 <?php
-require_once '../config/db.php';
+require_once __DIR__ . '/../config/request_logger.php';
+honeypot_log_http_request();
 
-// Ghi nhận log truy cập trang chủ
-$log_entry = sprintf(
-    "[%s] IP: %s | Method: GET | URI: /index.php | Payload: VIEW_HOMEPAGE\n",
-    date('Y-m-d H:i:s'),
-    $_SERVER['REMOTE_ADDR']
-);
-file_put_contents('../logs/access.log', $log_entry, FILE_APPEND);
+require_once '../config/db.php';
 
 // Danh sách sản phẩm mẫu TechStore
 $products = [
