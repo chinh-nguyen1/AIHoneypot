@@ -182,6 +182,7 @@ def get_stats():
                 ORDER BY a2.analyzed_at DESC, a2.id DESC
                 LIMIT 1
             )
+            WHERE latest.classification_status = 'CLASSIFIED'
             GROUP BY latest.attack_type
             """
         )
@@ -195,7 +196,7 @@ def get_stats():
             SELECT COUNT(*) AS unclassified_count
             FROM raw_logs r
             WHERE NOT EXISTS (
-                SELECT 1 FROM ai_labels a WHERE a.log_id = r.id
+                SELECT 1 FROM ai_labels a WHERE a.log_id = r.id AND a.classification_status = 'CLASSIFIED'
             )
             """
         )
@@ -249,7 +250,7 @@ def get_live_logs():
                    r.created_at, r.client_ip, r.http_method, r.request_uri,
                    a.attack_type, a.confidence_score, a.risk_score,
                    CASE
-                       WHEN a.id IS NULL THEN 'UNCLASSIFIED'
+                       WHEN a.id IS NULL OR a.classification_status <> 'CLASSIFIED' THEN 'UNCLASSIFIED'
                        ELSE 'CLASSIFIED'
                    END AS classification_status,
                    a.recommendation AS recommendation
