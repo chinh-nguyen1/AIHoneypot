@@ -267,6 +267,11 @@ def get_live_logs():
         """
         cursor.execute(query)
         rows = cursor.fetchall()
+        for row in rows:
+            if row["classification_status"] != "CLASSIFIED":
+                row["attack_type"] = None
+                row["confidence_score"] = None
+                row["risk_score"] = None
     except Exception as exc:
         error = exc
 
