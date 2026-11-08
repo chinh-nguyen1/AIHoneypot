@@ -164,3 +164,24 @@ docker compose down -v
 ```
 
 _Dự án được xây dựng và phát triển bởi Nhóm Đồ án Capstone AI-WebHoneypot._
+
+## Cập nhật bổ sung (2026-11-08)
+
+### Dịch vụ mới: Pentest Agent
+- pentest_agent (cổng 8082): API nội bộ chạy nmap/SQLi/XSS với đích cố định (decoy_web), không nhận input người dùng. Nút trong Attacker Console (cổng 8081) gọi qua đây để tránh lỗi CORS.
+
+### Biến môi trường mới trong .env
+Xem .env.example để biết đầy đủ danh sách. Nhóm mới thêm:
+- SMTP_SERVER, SMTP_PORT, SENDER_EMAIL, SENDER_PASSWORD, RECEIVER_EMAIL: cấu hình gửi email cảnh báo khi phát hiện tấn công có risk score >= 8. SENDER_PASSWORD phải là Gmail App Password, không phải mật khẩu đăng nhập thường.
+- MYSQL_DATA_VOLUME_NAME, MYSQL_DATA_VOLUME_EXTERNAL: tên volume dữ liệu MySQL.
+
+### Cài đặt lần đầu
+1. `git clone` repo.
+2. `Copy-Item .env.example .env` rồi điền giá trị thật.
+3. `docker compose up -d --build` — `4_database/schema.sql` đã đồng bộ đầy đủ với các migration, không cần chạy tay migration nữa.
+4. Mở `http://localhost:3000` (Dashboard), `http://localhost:8080` (Decoy Web), `http://localhost:8081` (Attacker Console), `http://localhost:8082/docs` (Pentest Agent API).
+
+### Giới hạn hiện tại
+- Mô hình Local ML chỉ huấn luyện từ 75 mẫu (25 mỗi nhãn), độ tin cậy thường dưới ngưỡng 0.85 nên nhiều sự kiện ở trạng thái NEEDS_REVIEW thay vì được gắn nhãn.
+- Gemini fallback (3_ai_engine/api/llm_advisor.py) chưa được nối vào luồng phân loại chính.
+- Bản đồ vị trí IP (bảng 	hreat_ips) chưa có cơ chế điền dữ liệu tự động.
