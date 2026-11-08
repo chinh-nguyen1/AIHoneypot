@@ -93,6 +93,11 @@ services:
       MYSQL_USER: ${MYSQL_USER:-honeypot_pipeline}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in .env}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-ai_webhoneypot_db}
+      SMTP_SERVER: ${SMTP_SERVER:-smtp.gmail.com}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SENDER_EMAIL: ${SENDER_EMAIL:-your_email@gmail.com}
+      SENDER_PASSWORD: ${SENDER_PASSWORD:-your_app_password}
+      RECEIVER_EMAIL: ${RECEIVER_EMAIL:-admin_soc@gmail.com}
     volumes:
       - ./1_decoy_web/logs:/app/logs:ro
       - pipeline_state:/app/state

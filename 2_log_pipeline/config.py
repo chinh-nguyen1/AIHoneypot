@@ -155,8 +155,8 @@ AI_API_URL = _env_or_default("AI_API_URL", "http://ai_engine:8000/analyze")
 LOG_FORMAT = _env_or_default("LOG_FORMAT", "jsonl").lower()
 
 # Giữ cấu hình SMTP để tương thích với email_alert.py.
-SMTP_SERVER = "smtp.gmail.com"
-SMTP_PORT = 587
-SENDER_EMAIL = "your_email@gmail.com"
-SENDER_PASSWORD = "your_app_password"
-RECEIVER_EMAIL = "admin_soc@gmail.com"
+SMTP_SERVER = _env_or_default("SMTP_SERVER", "smtp.gmail.com")
+SMTP_PORT = int(_env_or_default("SMTP_PORT", "587"))
+SENDER_EMAIL = _env_or_default("SENDER_EMAIL", "your_email@gmail.com")
+SENDER_PASSWORD = _env_or_default("SENDER_PASSWORD", "your_app_password")
+RECEIVER_EMAIL = _env_or_default("RECEIVER_EMAIL", "admin_soc@gmail.com")
