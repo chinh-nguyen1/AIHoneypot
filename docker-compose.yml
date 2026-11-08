@@ -128,3 +128,13 @@ services:
       - "8081:80"
     networks:
       - honeypot_net
+
+  pentest_agent:
+    build:
+      context: .
+      dockerfile: Dockerfile.pentest-agent
+    container_name: honeypot_pentest_agent
+    ports:
+      - "8082:8000"
+    networks:
+      - honeypot_net
