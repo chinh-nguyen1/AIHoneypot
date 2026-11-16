@@ -30,3 +30,7 @@ Thumbs.db
 node_modules/
 # Frontend build output
 /5_frontend_dashboard/build/
+
+# Kaggle raw staging & heavy merged datasets
+3_ai_engine/data/kaggle_staging/
+3_ai_engine/data/raw/dataset_full.csv
