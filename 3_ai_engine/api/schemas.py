@@ -4,7 +4,7 @@ from typing import Literal, Optional, get_args
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 
-AttackType = Literal["Normal", "SQLi", "XSS"]
+AttackType = Literal["Normal", "SQLi", "XSS", "CmdI", "PathTraversal"]
 CANONICAL_ATTACK_TYPES = get_args(AttackType)
 
 

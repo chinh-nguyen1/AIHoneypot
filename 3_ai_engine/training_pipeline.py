@@ -34,7 +34,7 @@ from dataset_normalization import DatasetNormalizer, NormalizedDatasetRecord
 
 
 logger = logging.getLogger(__name__)
-LABELS = ("Normal", "SQLi", "XSS")
+LABELS = ("Normal", "SQLi", "XSS", "CmdI", "PathTraversal")
 _MODEL_RANDOM_STATE = 42
 _SPLITS = ("train", "validation", "test")
 _SPLIT_RATIOS = {"train": 0.70, "validation": 0.15, "test": 0.15}
@@ -149,7 +149,7 @@ def _create_staging_schema(database: sqlite3.Connection) -> None:
             fingerprint TEXT PRIMARY KEY,
             normalized_payload TEXT NOT NULL,
             payload TEXT NOT NULL,
-            label TEXT NOT NULL CHECK (label IN ('Normal', 'SQLi', 'XSS')),
+            label TEXT NOT NULL CHECK (label IN ('Normal', 'SQLi', 'XSS', 'CmdI', 'PathTraversal')),
             source_file TEXT NOT NULL,
             source_record INTEGER NOT NULL,
             split TEXT,

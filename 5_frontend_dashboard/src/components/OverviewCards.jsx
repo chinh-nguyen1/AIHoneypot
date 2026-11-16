@@ -37,6 +37,8 @@ export default function OverviewCards({
     ["Tổng số sự kiện", stats.total_logs, "#4caf50"],
     ["Tấn công SQL Injection", stats.sqli_count, "#f44336"],
     ["Tấn công XSS", stats.xss_count, "#ff9800"],
+    ["Command Injection", stats.cmdi_count, "#9c27b0"],
+    ["Path Traversal", stats.pathtraversal_count, "#795548"],
     ["IP duy nhất", stats.unique_ips, "#00bcd4"],
     ["Chưa phân loại", stats.unclassified_count, "#b0bec5"],
   ];

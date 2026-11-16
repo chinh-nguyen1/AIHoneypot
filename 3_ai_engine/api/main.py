@@ -35,7 +35,7 @@ AI_MODEL_CANDIDATE = os.getenv("AI_MODEL_CANDIDATE", "")
 VALID_ATTACK_TYPES = frozenset(CANONICAL_ATTACK_TYPES)
 LOCAL_MODEL_LABELS = VALID_ATTACK_TYPES
 # Keep the existing attack scores; Normal uses the minimum score in the API contract.
-LOCAL_RISK_SCORES = {"Normal": 1, "SQLi": 9, "XSS": 8}
+LOCAL_RISK_SCORES = {"Normal": 1, "SQLi": 9, "XSS": 8, "CmdI": 10, "PathTraversal": 7}
 
 
 LOCAL_CONFIDENCE_THRESHOLD = 0.85
@@ -212,6 +212,8 @@ def get_stats():
             "sqli_count": attack_counts.get("SQLi", 0),
             "xss_count": attack_counts.get("XSS", 0),
             "normal_count": attack_counts.get("Normal", 0),
+            "cmdi_count": attack_counts.get("CmdI", 0),
+            "pathtraversal_count": attack_counts.get("PathTraversal", 0),
             "unique_ips": totals["unique_ips"],
         }
     except Exception as exc:

@@ -50,7 +50,7 @@ class DatasetNormalizationTests(unittest.TestCase):
         output, stats = self.run_normalizer(records)
 
         self.assertEqual([item.label for item in output], ["Normal", "SQLi", "XSS"])
-        self.assertEqual(stats.counts_by_label, {"Normal": 1, "SQLi": 1, "XSS": 1})
+        self.assertEqual(stats.counts_by_label, {"Normal": 1, "SQLi": 1, "XSS": 1, "CmdI": 0, "PathTraversal": 0})
 
     def test_declared_label_aliases_are_canonicalized(self):
         records = [
@@ -100,7 +100,7 @@ class DatasetNormalizationTests(unittest.TestCase):
     def test_unsupported_labels_are_rejected_without_falling_back_to_normal(self):
         records = [
             self.record("payload", "RCE"),
-            self.record("payload2", "Path_Traversal", 2),
+            self.record("payload2", "Open_Redirect", 2),
             self.record("payload3", "Suspicious", 3),
             self.record("payload4", "Benign", 4),
         ]
@@ -348,7 +348,7 @@ class DatasetNormalizationTests(unittest.TestCase):
         self.assertEqual(stats.duplicate_records, 2)
         self.assertEqual(stats.conflicting_records, 2)
         self.assertEqual(stats.unique_records, 2)
-        self.assertEqual(stats.counts_by_label, {"Normal": 2, "SQLi": 0, "XSS": 0})
+        self.assertEqual(stats.counts_by_label, {"Normal": 2, "SQLi": 0, "XSS": 0, "CmdI": 0, "PathTraversal": 0})
         self.assertEqual(
             stats.counts_by_reject_reason[
                 "label is not one of Normal, SQLi, XSS or a declared alias"

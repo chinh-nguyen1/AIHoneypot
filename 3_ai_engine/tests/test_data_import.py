@@ -50,7 +50,7 @@ class DatasetImporterTests(unittest.TestCase):
         self.assertEqual([record.source_record for record in records], [1, 2, 3])
         self.assertEqual(stats.records_read, 3)
         self.assertEqual(stats.valid_records, 3)
-        self.assertEqual(stats.label_counts, {"SQLi": 1, "XSS": 1, "Normal": 1})
+        self.assertEqual(stats.label_counts, {"SQLi": 1, "XSS": 1, "Normal": 1, "CmdI": 0, "PathTraversal": 0})
 
     def test_importer_canonicalizes_every_supported_label_alias(self):
         aliases = [

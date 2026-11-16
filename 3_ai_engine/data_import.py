@@ -10,13 +10,18 @@ from pathlib import Path
 from typing import Iterable, Iterator, Optional, TextIO, Union
 
 
-SUPPORTED_LABELS = ("SQLi", "XSS", "Normal")
+SUPPORTED_LABELS = ("SQLi", "XSS", "Normal", "CmdI", "PathTraversal")
 LABEL_ALIASES = {
     "normal": "Normal",
     "sqli": "SQLi",
     "sql_injection": "SQLi",
     "xss": "XSS",
     "cross_site_scripting": "XSS",
+    "cmdi": "CmdI",
+    "command_injection": "CmdI",
+    "path_traversal": "PathTraversal",
+    "pathtraversal": "PathTraversal",
+    "directory_traversal": "PathTraversal",
 }
 PathLike = Union[str, Path]
 

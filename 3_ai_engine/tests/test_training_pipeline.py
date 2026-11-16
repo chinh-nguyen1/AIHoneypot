@@ -74,6 +74,8 @@ class TrainingPipelineTests(unittest.TestCase):
                 "Normal": "normal",
                 "SQLi": "sql_injection",
                 "XSS": "cross_site_scripting",
+                "CmdI": "command_injection",
+                "PathTraversal": "path_traversal",
             }
             for label in LABELS:
                 for index in range(per_class):
@@ -149,7 +151,7 @@ class TrainingPipelineTests(unittest.TestCase):
         self.assertEqual(result.metadata["import_stats"]["rejected_records"], 1)
         self.assertEqual(
             result.metadata["normalization_stats"]["counts_by_label"],
-            {"SQLi": 12, "XSS": 12, "Normal": 12},
+            {"SQLi": 12, "XSS": 12, "Normal": 12, "CmdI": 12, "PathTraversal": 12},
         )
         self.assertEqual(
             result.metadata["dataset_provenance"][0]["source_file"],
@@ -231,13 +233,13 @@ class TrainingPipelineTests(unittest.TestCase):
 
     def test_stratified_counts_preserve_all_samples_and_approximate_ratio(self):
         counts, assignments = self.assignments(list(self.records(20)), 42)
-        self.assertEqual(len(assignments), 60)
+        self.assertEqual(len(assignments), 100)
         for label in LABELS:
             self.assertEqual(
                 [counts[split][label] for split in ("train", "validation", "test")],
                 [14, 3, 3],
             )
-        self.assertEqual(sum(sum(row.values()) for row in counts.values()), 60)
+        self.assertEqual(sum(sum(row.values()) for row in counts.values()), 100)
 
     def test_split_fails_when_class_cannot_be_represented_everywhere(self):
         database = self.make_database(list(self.records(2)))
@@ -312,7 +314,7 @@ class TrainingPipelineTests(unittest.TestCase):
             payloads, _ = next(_iter_split_batches(database, "test", 2))
             features = vectorizer.transform(payloads)
             self.assertEqual(len(model.predict(features)), len(payloads))
-            self.assertEqual(model.predict_proba(features).shape, (len(payloads), 3))
+            self.assertEqual(model.predict_proba(features).shape, (len(payloads), 5))
         finally:
             database.close()
 
@@ -857,17 +859,19 @@ class TrainingPipelineTests(unittest.TestCase):
         metrics = _metrics_from_confusion(
             np.asarray(
                 [
-                    [2, 0, 0],
-                    [0, 0, 1],
-                    [0, 0, 1],
+                    [2, 0, 0, 0, 0],
+                    [0, 0, 1, 0, 0],
+                    [0, 0, 1, 0, 0],
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0],
                 ]
             )
         )
-        self.assertEqual(metrics["class_order"], ["Normal", "SQLi", "XSS"])
+        self.assertEqual(metrics["class_order"], ["Normal", "SQLi", "XSS", "CmdI", "PathTraversal"])
         self.assertEqual(metrics["per_class"]["SQLi"]["precision"], 0.0)
         self.assertEqual(metrics["per_class"]["SQLi"]["recall"], 0.0)
         self.assertEqual(metrics["zero_division"], 0)
-        self.assertEqual(metrics["confusion_matrix"][1], [0, 0, 1])
+        self.assertEqual(metrics["confusion_matrix"][1], [0, 0, 1, 0, 0])
 
     def test_full_run_evaluates_both_candidates_and_writes_complete_metadata(self):
         path = self.write_dataset(per_class=30)
@@ -909,7 +913,7 @@ class TrainingPipelineTests(unittest.TestCase):
         self.assertEqual(metadata["training_config"]["random_seed"], 42)
         self.assertEqual(
             metadata["split_counts"]["train"],
-            {"Normal": 21, "SQLi": 21, "XSS": 21},
+            {"Normal": 21, "SQLi": 21, "XSS": 21, "CmdI": 21, "PathTraversal": 21},
         )
         for candidate_name in ("baseline", "alternative"):
             candidate = metadata["candidates"][candidate_name]
@@ -922,7 +926,7 @@ class TrainingPipelineTests(unittest.TestCase):
             )
             self.assertEqual(
                 candidate["canonical_classes"],
-                ["Normal", "SQLi", "XSS"],
+                ["Normal", "SQLi", "XSS", "CmdI", "PathTraversal"],
             )
             self.assertEqual(
                 candidate["algorithm"],
@@ -948,7 +952,7 @@ class TrainingPipelineTests(unittest.TestCase):
             )
             self.assertEqual(
                 candidate["metrics"]["test"]["class_order"],
-                ["Normal", "SQLi", "XSS"],
+                ["Normal", "SQLi", "XSS", "CmdI", "PathTraversal"],
             )
             self.assertEqual(
                 candidate["metrics"]["test"]["total_samples"],
@@ -974,7 +978,7 @@ class TrainingPipelineTests(unittest.TestCase):
                 list(model.classes_),
                 metadata["candidates"][candidate_name]["classes"],
             )
-            self.assertEqual(model.predict_proba(features).shape, (1, 3))
+            self.assertEqual(model.predict_proba(features).shape, (1, 5))
 
     def test_insufficient_class_failure_publishes_no_release_and_cleans_temp(self):
         path = self.write_dataset(per_class=2)
